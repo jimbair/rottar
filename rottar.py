@@ -38,8 +38,9 @@ backupInclude = ( '/bin', '/boot', '/etc', '/home', '/lib', '/lib64', '/opt',
 # Paths to exclude (e.g., subdirectories in BACKUP_INCLUDE)
 backupExclude = ()
 
-# Number of disks being used.
-tapeNumber = 2
+# Number of tapes being used. Minimum is 7 for 1 week, each tape past 
+# 7 is another week. 10 tapes is 1 month.
+tapeNumber = 10
 
 # Full backup day
 fullBackupDay = 'Monday'
