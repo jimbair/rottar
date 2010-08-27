@@ -1,0 +1,5 @@
+rottar is a project started by David Cantrell in BASH and is being ported to Python by James Bair. The goal is to make a tape backup application via the command line that does automated daily backups.
+
+This is a work in progress and will not work until said work is completed. =) This README will be updated as such.
+
+All works are Apache 2.0 licensed as indicated in the headers of the files.
