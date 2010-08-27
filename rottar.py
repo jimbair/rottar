@@ -33,7 +33,7 @@ import time
 
 # Paths to back up
 backupInclude = ( '/bin', '/boot', '/etc', '/home', '/lib', '/lib64', '/opt',
-                 '/root', '/sbin', '/usr', '/var' )
+                  '/root', '/sbin', '/usr', '/var' )
 
 # Paths to exclude (e.g., subdirectories in BACKUP_INCLUDE)
 backupExclude = ()
@@ -47,6 +47,9 @@ fullBackupDay = 'Monday'
 
 # What day is it today?
 currentDay = time.strftime("%A", time.localtime())
+
+# Where we keep our data
+TARDB = '/var/lib/tar'
 
 # Functions
 
@@ -128,11 +131,6 @@ def main():
 
 
 ### MAIN ###
-
-PATH=/bin:/usr/bin
-TARDB=/var/lib/tar
-
-DAYOFWEEK="$(date +%a)"
 STAMP="$(date +%d-%b-%Y)"
 LISTED_INCR="${TARDB}/listed-incremental.$(hostname)"
 CURR_INCR_TAPE="${TARDB}/curr_incremental_tape"
