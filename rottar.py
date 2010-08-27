@@ -27,6 +27,7 @@
 # Modules
 import os
 import re
+import time
 
 # Settings
 
@@ -43,32 +44,10 @@ tapeNumber = 2
 # Full backup day
 fullBackupDay = 'Monday'
 
+# What day is it today?
+currentDay = time.strftime("%A", time.localtime())
 
 # Functions
-
-def currentDay():
-    """
-    Returns the current day (in a string) like 'Monday' using 
-    the time object.
-    """
-
-    backupDays = { 0: 'Monday',
-                   1: 'Tuesday',
-                   2: 'Wednesday',
-                   3: 'Thursday',
-                   4: 'Friday',
-                   5: 'Saturday',
-                   6: 'Sunday' }
-
-     timeObj = time.localtime()
-     day = timeObj.tm_wday
-
-     # This should never happen.
-     if day not in backupDays:
-         return None
-
-     return backupDays[day]
-
 
 def findTapeDevices():
     """
