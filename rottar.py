@@ -34,7 +34,41 @@ import re
 backupInclude = ( '/bin', '/boot', '/etc', '/home', '/lib', '/lib64', '/opt',
                  '/root', '/sbin', '/usr', '/var' )
 
+# Paths to exclude (e.g., subdirectories in BACKUP_INCLUDE)
+backupExclude = ()
+
+# Number of disks being used.
+tapeNumber = 2
+
+# Full backup day
+fullBackupDay = 'Monday'
+
+
 # Functions
+
+def currentDay():
+    """
+    Returns the current day (in a string) like 'Monday' using 
+    the time object.
+    """
+
+    backupDays = { 0: 'Monday',
+                   1: 'Tuesday',
+                   2: 'Wednesday',
+                   3: 'Thursday',
+                   4: 'Friday',
+                   5: 'Saturday',
+                   6: 'Sunday' }
+
+     timeObj = time.localtime()
+     day = timeObj.tm_wday
+
+     # This should never happen.
+     if day not in backupDays:
+         return None
+
+     return backupDays[day]
+
 
 def findTapeDevices():
     """
@@ -110,16 +144,7 @@ def main():
     dev = dev[0]
 
 
-# Paths to exclude (e.g., subdirectories in BACKUP_INCLUDE)
-BACKUP_EXCLUDE=
 
-# Full backup tape letter range (e.g., min of A and max of D would have
-# four tapes in the full backup rotation)
-MIN_FULL_VOL="A"
-MAX_FULL_VOL="B"
-
-# Full backup day
-FULL_BACKUP_DAY="Mon"
 
 
 ### MAIN ###
