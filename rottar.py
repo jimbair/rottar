@@ -27,6 +27,7 @@
 # Modules
 import os
 import re
+import sys
 import time
 
 # Settings
@@ -127,84 +128,85 @@ def main():
     dev = dev[0]
 
 
-
+if __name__ == '__main__':
+    main()
 
 
 ### MAIN ###
-STAMP="$(date +%d-%b-%Y)"
-LISTED_INCR="${TARDB}/listed-incremental.$(hostname)"
-CURR_INCR_TAPE="${TARDB}/curr_incremental_tape"
-CURR_FULL_TAPE="${TARDB}/curr_full_tape"
+#STAMP="$(date +%d-%b-%Y)"
+#LISTED_INCR="${TARDB}/listed-incremental.$(hostname)"
+#CURR_INCR_TAPE="${TARDB}/curr_incremental_tape"
+#CURR_FULL_TAPE="${TARDB}/curr_full_tape"
 
-if [ ! -r ${TAPEDEV} ]; then
-    echo "${TAPEDEV} does not exist." >&2
-    exit 1
-fi
+#if [ ! -r ${TAPEDEV} ]; then
+#    echo "${TAPEDEV} does not exist." >&2
+#    exit 1
+#fi
 
-if [ ! -d "${TARDB}" ]; then
-    mkdir -p "${INCRDR}"
-fi
+#if [ ! -d "${TARDB}" ]; then
+#    mkdir -p "${INCRDR}"
+#fi
 
-if [ "${DAYOFWEEK}" = "${FULL_BACKUP_DAY}" ]; then
-    t="Full"
-    CURR_FILE="${CURR_FULL_TAPE}"
-    if [ -f "${CURR_FULL_TAPE}" ]; then
-        curr="$(cat ${CURR_FULL_TAPE} | tr -d "\n" | od -An -t dC)"
-        max="$(echo "${MAX_FULL_VOL}" | tr -d "\n" | od -An -t dC)"
+#if [ "${DAYOFWEEK}" = "${FULL_BACKUP_DAY}" ]; then
+#    t="Full"
+#    CURR_FILE="${CURR_FULL_TAPE}"
+#    if [ -f "${CURR_FULL_TAPE}" ]; then
+#        curr="$(cat ${CURR_FULL_TAPE} | tr -d "\n" | od -An -t dC)"
+#        max="$(echo "${MAX_FULL_VOL}" | tr -d "\n" | od -An -t dC)"
+#
+#        if [ "${curr}" = "${max}" ]; then
+#            NEEDED_TAPE="${MIN_FULL_VOL}"
+#        else
+#            next="$(expr ${curr} + 1)"
+#            NEEDED_TAPE="$(awk -v char=${next} 'BEGIN { printf "%c\n", char; exit }')"
+#        fi
+#    else
+#        NEEDED_TAPE="${MIN_FULL_VOL}"
+#    fi
+#else
+#    t="Incremental"
+#    CURR_FILE="${CURR_INCR_TAPE}"
+#    if [ -f "${CURR_INCR_TAPE}" ]; then
+#        NEEDED_TAPE="$(expr $(cat ${CURR_INCR_TAPE}) + 1)"
+#    else
+#        NEEDED_TAPE="1"
+#    fi
+#fi
 
-        if [ "${curr}" = "${max}" ]; then
-            NEEDED_TAPE="${MIN_FULL_VOL}"
-        else
-            next="$(expr ${curr} + 1)"
-            NEEDED_TAPE="$(awk -v char=${next} 'BEGIN { printf "%c\n", char; exit }')"
-        fi
-    else
-        NEEDED_TAPE="${MIN_FULL_VOL}"
-    fi
-else
-    t="Incremental"
-    CURR_FILE="${CURR_INCR_TAPE}"
-    if [ -f "${CURR_INCR_TAPE}" ]; then
-        NEEDED_TAPE="$(expr $(cat ${CURR_INCR_TAPE}) + 1)"
-    else
-        NEEDED_TAPE="1"
-    fi
-fi
+#EXCLUDE_LIST="$(mktemp -t exclude-list.XXXXXXXXXX)"
+#echo "${LISTED_INCR}" > ${EXCLUDE_LIST}
+#find /var -type s >> ${EXCLUDE_LIST}
 
-EXCLUDE_LIST="$(mktemp -t exclude-list.XXXXXXXXXX)"
-echo "${LISTED_INCR}" > ${EXCLUDE_LIST}
-find /var -type s >> ${EXCLUDE_LIST}
+#echo "Insert tape \"${t} ${NEEDED_TAPE}\""
+#echo -n "Press Enter to begin ${t} backup for ${STAMP}..."
+#read JUNK
 
-echo "Insert tape \"${t} ${NEEDED_TAPE}\""
-echo -n "Press Enter to begin ${t} backup for ${STAMP}..."
-read JUNK
+#if [ "${t}" = "Full" ]; then
+#    echo
+#    echo -n ">>> Forcing full backup by removing listed incremental db..."
+#    rm -f ${LISTED_INCR} ${CURR_INCR_TAPE}
+#    echo "done."
+#fi
 
-if [ "${t}" = "Full" ]; then
-    echo
-    echo -n ">>> Forcing full backup by removing listed incremental db..."
-    rm -f ${LISTED_INCR} ${CURR_INCR_TAPE}
-    echo "done."
-fi
+#echo
+#echo -n ">>> Erasing tape \"${t} ${NEEDED_TAPE}\"..."
+#mt -f ${TAPEDEV} erase
+#echo "done."
 
-echo
-echo -n ">>> Erasing tape \"${t} ${NEEDED_TAPE}\"..."
-mt -f ${TAPEDEV} erase
-echo "done."
+#echo
+#echo ">>> Running tar..."
+#tar -c -v -f ${TAPEDEV} -g ${LISTED_INCR} \
+#    -X ${EXCLUDE_LIST} \
+#    --acls --selinux --xattrs --totals=SIGUSR1 \
+#    ${BACKUP_INCLUDE} 2> ${TARDB}/tar.stderr
+#rm -f ${EXCLUDE_LIST}
 
-echo
-echo ">>> Running tar..."
-tar -c -v -f ${TAPEDEV} -g ${LISTED_INCR} \
-    -X ${EXCLUDE_LIST} \
-    --acls --selinux --xattrs --totals=SIGUSR1 \
-    ${BACKUP_INCLUDE} 2> ${TARDB}/tar.stderr
-rm -f ${EXCLUDE_LIST}
+#echo
+#echo -n ">>> Recording current tape in use..."
+#echo "${NEEDED_TAPE}" > ${CURR_FILE}
+#echo "done."
 
-echo
-echo -n ">>> Recording current tape in use..."
-echo "${NEEDED_TAPE}" > ${CURR_FILE}
-echo "done."
-
-echo
-echo -n ">>> Rewinding and ejecting tape \"${t} ${NEEDED_TAPE}\"..."
-mt -f ${TAPEDEV} offline
-echo "done."
+#echo
+#echo -n ">>> Rewinding and ejecting tape \"${t} ${NEEDED_TAPE}\"..."
+#mt -f ${TAPEDEV} offline
+#echo "done."
