@@ -1,7 +1,4 @@
 #!/usr/bin/python
-#
-# Written in BASH by David Cantrell
-# Ported to Python by James Bair
 # 
 # NOT YET FINISHED - DO NOT RUN LOL
 # The BASH code is still in place, and as it is replaced with Python, 
@@ -27,6 +24,7 @@
 # Modules
 import os
 import re
+import socket
 import sys
 import time
 
@@ -46,11 +44,17 @@ tapeNumber = 10
 # Full backup day
 fullBackupDay = 'Monday'
 
-# What day is it today?
+# Time based objects
 currentDay = time.strftime("%A", time.localtime())
+stamp = time.strftime("%d-%b-%Y", time.localtime())
 
 # Where we keep our data
-TARDB = '/var/lib/tar'
+# socket gets full hostname, which is why it's used over os.uname()
+hostname = socket.gethostname()
+tarDB = '/var/lib/tar'
+listedIncr = '%s/listed-incremental.%s' % (tarDB, hostname)
+currentIncrTape = '%s/curr_incremental_tape' % (tarDB,)
+currentFullTape = '%s/curr_full_tape' % (tarDB,)
 
 # Functions
 
@@ -77,7 +81,7 @@ def findTapeDevices():
 
     return results
 
-def validTapeDevice(devices=[]):
+def validTapeDevices(devices=[]):
     """
     Used to validate if we support a tape device. Currently, this program will
     only support /dev/st0 style devices.
@@ -108,7 +112,8 @@ def main():
         sys.stderr.write('Unable to find any tape devices.\n')
         sys.exit(1)
     # Now, make sure we support what we found
-    elif validTapeDevice(dev) is None:
+    dev = validTapeDevices(dev)
+    if dev is None:
         sys.stderr.write('No supported tape devices found.\n')
         sys.exit(1)
     # We also only support a single device as of now.
@@ -117,7 +122,7 @@ def main():
                          'only a single device is supported.\n' % (len(dev),))
         sys.exit(1)
 
-    # Check our folders we are backing up.
+    # Check the folders we are backing up.
     for folder in backupInclude:
         if not os.path.isdir(folder):
             sys.stderr.write("ERROR: %s is not a folder and is "
@@ -127,51 +132,54 @@ def main():
     # If we are good, make our device a string object.
     dev = dev[0]
 
+    # If we don't have our tarDB, make it.
+    if not os.path.isdir(tarDB):
+        os.mkdir(tarDB)
+
+    # If we have to run full backup
+    if currentDay == fullBackupDay:
+        currentFile = currentFullTape
+        backupType = 'Full'
+        if os.path.isfile(currentFullTape):
+            print "Need to come back to this and figure out how to do it."
+            
+            f = open(currentFullTape, 'r')
+            current = f.read().strip()
+            f.close()
+            # Turn into a number
+            
+            # Turn last drive into a number
+            last = 'D'
+
+            if current == last:
+                neededTape = 'A'
+            # Again, needs to be dynamic. Letter + 1
+            else
+                neededTape = 'B'
+                # neededTape = self + 1 (basically)
+
+        else
+            # Need to make this dynamic
+            neededTape = 'A'
+
+    # If we have to run an incrementa bacup
+    else
+        backupType = 'Incremental'
+        currentFile = currentIncrTape
+        # The increment tape we need
+        if os.path.isfile(currentIncrTape):
+            f = open(currentIncrTape, 'r')
+            neededTape = int(f.read().strip()) + 1
+            f.close()
+        else
+            neededTape = 1
+                
 
 if __name__ == '__main__':
     main()
 
 
 ### MAIN ###
-#STAMP="$(date +%d-%b-%Y)"
-#LISTED_INCR="${TARDB}/listed-incremental.$(hostname)"
-#CURR_INCR_TAPE="${TARDB}/curr_incremental_tape"
-#CURR_FULL_TAPE="${TARDB}/curr_full_tape"
-
-#if [ ! -r ${TAPEDEV} ]; then
-#    echo "${TAPEDEV} does not exist." >&2
-#    exit 1
-#fi
-
-#if [ ! -d "${TARDB}" ]; then
-#    mkdir -p "${INCRDR}"
-#fi
-
-#if [ "${DAYOFWEEK}" = "${FULL_BACKUP_DAY}" ]; then
-#    t="Full"
-#    CURR_FILE="${CURR_FULL_TAPE}"
-#    if [ -f "${CURR_FULL_TAPE}" ]; then
-#        curr="$(cat ${CURR_FULL_TAPE} | tr -d "\n" | od -An -t dC)"
-#        max="$(echo "${MAX_FULL_VOL}" | tr -d "\n" | od -An -t dC)"
-#
-#        if [ "${curr}" = "${max}" ]; then
-#            NEEDED_TAPE="${MIN_FULL_VOL}"
-#        else
-#            next="$(expr ${curr} + 1)"
-#            NEEDED_TAPE="$(awk -v char=${next} 'BEGIN { printf "%c\n", char; exit }')"
-#        fi
-#    else
-#        NEEDED_TAPE="${MIN_FULL_VOL}"
-#    fi
-#else
-#    t="Incremental"
-#    CURR_FILE="${CURR_INCR_TAPE}"
-#    if [ -f "${CURR_INCR_TAPE}" ]; then
-#        NEEDED_TAPE="$(expr $(cat ${CURR_INCR_TAPE}) + 1)"
-#    else
-#        NEEDED_TAPE="1"
-#    fi
-#fi
 
 #EXCLUDE_LIST="$(mktemp -t exclude-list.XXXXXXXXXX)"
 #echo "${LISTED_INCR}" > ${EXCLUDE_LIST}
