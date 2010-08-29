@@ -41,6 +41,11 @@ backupExclude = ()
 # 7 is another week. 10 tapes is 1 month.
 tapeNumber = 10
 
+# Find our min/max full backup tape info dynamically
+minimumFullVolume = 'A'
+maximumFullVolume = chr(ord(minimumFullVolume) + tapeNumber - 6)
+
+
 # Full backup day
 fullBackupDay = 'Monday'
 
@@ -122,6 +127,12 @@ def main():
                          'only a single device is supported.\n' % (len(dev),))
         sys.exit(1)
 
+    # Find our tape info
+    # Need at least 7 tapes
+    if tapeNumber < 7:
+        sys.stderr.write('A minimum of 7 tapes for backups are required.\n')
+        sys.exit(1)
+    
     # Check the folders we are backing up.
     for folder in backupInclude:
         if not os.path.isdir(folder):
@@ -140,27 +151,23 @@ def main():
     if currentDay == fullBackupDay:
         currentFile = currentFullTape
         backupType = 'Full'
+
+        # If our file exists, read it to find the value.
         if os.path.isfile(currentFullTape):
-            print "Need to come back to this and figure out how to do it."
-            
+
             f = open(currentFullTape, 'r')
             current = f.read().strip()
             f.close()
-            # Turn into a number
-            
-            # Turn last drive into a number
-            last = 'D'
 
-            if current == last:
-                neededTape = 'A'
-            # Again, needs to be dynamic. Letter + 1
+            # If we are at the max, go back to the start.
+            if current == maximumFullVolume:
+                neededTape = minimumFullVolume
+            # Otherwise, go up one letter.
             else
-                neededTape = 'B'
-                # neededTape = self + 1 (basically)
-
+                neededTape = chr(ord(current) + 1)
+        # If no file, start from the beginning.
         else
-            # Need to make this dynamic
-            neededTape = 'A'
+            neededTape = minimumFullVolume
 
     # If we have to run an incrementa bacup
     else
