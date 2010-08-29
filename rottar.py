@@ -43,7 +43,7 @@ tapeNumber = 10
 
 # Find our min/max full backup tape info dynamically
 minimumFullVolume = 'A'
-maximumFullVolume = chr(ord(minimumFullVolume) + tapeNumber - 6)
+maximumFullVolume = chr(ord(minimumFullVolume) + tapeNumber - 7)
 
 
 # Full backup day
