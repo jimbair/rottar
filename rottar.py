@@ -138,10 +138,14 @@ def main():
         sys.exit(1)
     
     # Ensure we have any external applications we need
+    needApp = False
     for app in apps:
         status, text = commands.getstatusoutput('%s --help' % (app,))
         if status != 0:
             sys.stderr.write('Missing dependency: %s' % (app,)
+            needApp = True
+    if needApp:
+        sys.exit(1)
     
     # Check the folders we are backing up.
     for folder in backupInclude:
