@@ -149,8 +149,8 @@ def main():
 
     # If we have to run full backup
     if currentDay == fullBackupDay:
-        currentFile = currentFullTape
         backupType = 'Full'
+        currentFile = currentFullTape
 
         # If our file exists, read it to find the value.
         if os.path.isfile(currentFullTape):
@@ -173,6 +173,7 @@ def main():
     else
         backupType = 'Incremental'
         currentFile = currentIncrTape
+
         # The increment tape we need
         if os.path.isfile(currentIncrTape):
             f = open(currentIncrTape, 'r')
