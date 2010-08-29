@@ -22,6 +22,7 @@
 # limitations under the License.
 
 # Modules
+import commands
 import os
 import re
 import socket
@@ -60,6 +61,9 @@ tarDB = '/var/lib/tar'
 listedIncr = '%s/listed-incremental.%s' % (tarDB, hostname)
 currentIncrTape = '%s/curr_incremental_tape' % (tarDB,)
 currentFullTape = '%s/curr_full_tape' % (tarDB,)
+
+# External system apps we need
+apps = ( 'tar', 'mt' )
 
 # Functions
 
@@ -132,6 +136,12 @@ def main():
     if tapeNumber < 7:
         sys.stderr.write('A minimum of 7 tapes for backups are required.\n')
         sys.exit(1)
+    
+    # Ensure we have any external applications we need
+    for app in apps:
+        status, text = commands.getstatusoutput('%s --help' % (app,))
+        if status != 0:
+            sys.stderr.write('Missing dependency: %s' % (app,)
     
     # Check the folders we are backing up.
     for folder in backupInclude:
