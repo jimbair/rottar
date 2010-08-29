@@ -200,7 +200,29 @@ def main():
             f.close()
         else
             neededTape = 1
-                
+
+    # Start the real work
+    sys.stdout.write('Insert tape "%s %s"' % (backupType, neededTape))
+    sys.stdout.flush()
+    raw_input('Press Enter to begin %s backup for %s' % (backupType, stamp))
+    sys.stdout.write('\n')
+
+    if backupType == 'Full':
+        sys.stdout.write('>>> Forcing full backup by removing listed incremental db...')
+        sys.stdout.flush()
+        os.remove(listedIncr)
+        os.remove(currentIncrTape)
+        sys.stdout.write('done.\n\n')
+        sys.stdout.flush()
+
+    sys.stdout.write('>>> Erasing tape "%s %s"' % (backupType, neededTape))
+    status, text = commands.getstatusoutput('mt -f %s erase' % (dev,))
+    if status == 0:
+        sys.stdout.write('done.\n\n')
+        sys.stdout.flush()
+    else:
+        sys.stdout.write('failed.\n\n')
+        sys.stderr.write('Erasing tape failed.\n\nExit code: %d\nReponse: %s' % (status, text)
 
 if __name__ == '__main__':
     main()
@@ -212,21 +234,6 @@ if __name__ == '__main__':
 #echo "${LISTED_INCR}" > ${EXCLUDE_LIST}
 #find /var -type s >> ${EXCLUDE_LIST}
 
-#echo "Insert tape \"${t} ${NEEDED_TAPE}\""
-#echo -n "Press Enter to begin ${t} backup for ${STAMP}..."
-#read JUNK
-
-#if [ "${t}" = "Full" ]; then
-#    echo
-#    echo -n ">>> Forcing full backup by removing listed incremental db..."
-#    rm -f ${LISTED_INCR} ${CURR_INCR_TAPE}
-#    echo "done."
-#fi
-
-#echo
-#echo -n ">>> Erasing tape \"${t} ${NEEDED_TAPE}\"..."
-#mt -f ${TAPEDEV} erase
-#echo "done."
 
 #echo
 #echo ">>> Running tar..."
