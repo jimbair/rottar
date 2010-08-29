@@ -115,6 +115,11 @@ def main():
     Our main function.
     """
  
+    # Must be root
+    if os.getuid() != 0:
+        sys.stderr.write('This program must be run as root.\n')
+        sys.exit(1)
+
     # Make sure we have a tape device
     dev = findTapeDevices()
     if dev is None:
